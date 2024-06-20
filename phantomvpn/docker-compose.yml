@@ -1,0 +1,35 @@
+services:
+  phantomvpn:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: phantomvpn
+    cap_add:
+      - net_admin
+    restart: "no"
+    environment:
+      - SERVER=${SERVER-nearest}
+      - phantomvpn_user=$phantomvpn_user
+      - phantomvpn_pass=$phantomvpn_pass
+    tmpfs:
+      - /run:exec
+      - /tmp
+    volumes:
+      - ./config:/config
+    security_opt:
+      - label:disable
+      - no-new-privileges
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+        driver: default
+        config:
+            - subnet: "192.0.2.0/24"
+              gateway: "192.0.2.1"
+    driver_opts:
+      com.docker.network.bridge.host_binding_ipv4: 127.0.0.1
+      com.docker.network.bridge.enable_icc: "false"
